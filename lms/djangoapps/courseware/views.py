@@ -67,6 +67,8 @@ import survey.utils
 import survey.views
 
 from util.views import ensure_valid_course_key
+from django.views.decorators.csrf import csrf_exempt
+
 log = logging.getLogger("edx.courseware")
 
 template_imports = {'urllib': urllib}
@@ -280,6 +282,7 @@ def chat_settings(course, user):
 
 @login_required
 @ensure_csrf_cookie
+@csrf_exempt
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @ensure_valid_course_key
 @commit_on_success_with_read_committed
@@ -444,6 +447,14 @@ def _index_bulk_op(request, course_key, chapter, section, position):
 
             if section_descriptor.default_tab:
                 context['default_tab'] = section_descriptor.default_tab
+
+            ### DEKKER
+            if 'lti' in request.GET and request.GET['lti'] == 'true':
+                context['disable_accordion'] = True
+                context['disable_tabs'] = True
+                context['suppress_toplevel_navigation'] = True
+                context['suppress_module_navigation'] = True
+            ### END DEKKER
 
             # cdodge: this looks silly, but let's refetch the section_descriptor with depth=None
             # which will prefetch the children more efficiently than doing a recursive load

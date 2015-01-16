@@ -348,6 +348,27 @@
       }
     }
 
+    // UI: lti enabled
+    .edit-lti-details {
+
+      .checkbox-cosmetic .input-checkbox {
+        @extend %cont-text-sr;
+
+        // CASE: unchecked
+        ~ .tip-warning {
+          display: block;
+        }
+
+        // CASE: checked
+        &:checked {
+
+          ~ .tip-warning {
+            display: none;
+          }
+        }
+      }
+    }
+
     // UI: staff lock section
     .edit-staff-lock {
 

@@ -52,6 +52,11 @@ class InheritanceMixin(XBlockMixin):
         default=None,
         scope=Scope.user_state,
     )
+    lti_enabled = Boolean(
+        help=_("If true, can be embedded in an LTI container."),
+        default=False,
+        scope=Scope.settings,
+    )
     visible_to_staff_only = Boolean(
         help=_("If true, can be seen only by course staff, regardless of start date."),
         default=False,

@@ -13,7 +13,7 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
 ) {
     'use strict';
     var CourseOutlineXBlockModal, SettingsXBlockModal, PublishXBlockModal, AbstractEditor, BaseDateEditor,
-        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, StaffLockEditor;
+        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, StaffLockEditor, LtiEditor;
 
     CourseOutlineXBlockModal = BaseModal.extend({
         events : {
@@ -298,6 +298,64 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         }
     });
 
+    LtiEditor = AbstractEditor.extend({
+        templateName: 'lti-details',
+        className: 'edit-lti-details',
+        isModelEnabled: function() {
+            //this is the check on load
+            return this.model.get('lti_enabled');
+        },
+
+        afterRender: function () {
+            AbstractEditor.prototype.afterRender.call(this);
+            this.setEnabled(this.isModelEnabled());
+        },
+
+        setEnabled: function(value) {
+            this.$('#lti_enabled').prop('checked', value);
+            if(value) {
+                this.$('.lti_launch_url').val('http://localhost:8000/lti/blah');
+                this.$('.lti_launch_url').attr('disabled',false);
+                this.$('.lti_username').val('test');
+                this.$('.lti_username').attr('disabled',false);
+                this.$('.lti_secret').val('test');
+                this.$('.lti_secret').attr('disabled',false);
+            } else {
+                this.$('.lti_launch_url').val('');
+                this.$('.lti_launch_url').attr('disabled',true);
+                this.$('.lti_username').val('');
+                this.$('.lti_username').attr('disabled',true);
+                this.$('.lti_secret').val('');
+                this.$('.lti_secret').attr('disabled',true);
+            }
+        },
+
+        isEnabled: function() {
+            return this.$('#lti_enabled').is(':checked');
+        },
+
+        hasChanges: function() {
+            return this.isModelEnabled() != this.isEnabled();
+        },
+
+        getRequestData: function() {
+            //return {};  // REMOVE THIS BLBK
+            return this.hasChanges() ? {
+                publish: 'republish',
+                metadata: {
+                    lti_enabled: this.isEnabled() ? true : null
+                    }
+                } : {};
+        },
+
+        getContext: function () {
+            return {
+                hasLTIEnabled: this.isModelEnabled()
+            }
+        }
+    });
+
+
     StaffLockEditor = AbstractEditor.extend({
         templateName: 'staff-lock-editor',
         className: 'edit-staff-lock',
@@ -358,7 +416,7 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
             if (xblockInfo.isChapter()) {
                 editors = [ReleaseDateEditor, StaffLockEditor];
             } else if (xblockInfo.isSequential()) {
-                editors = [ReleaseDateEditor, GradingEditor, DueDateEditor, StaffLockEditor];
+                editors = [ReleaseDateEditor, GradingEditor, DueDateEditor, StaffLockEditor, LtiEditor];
             } else if (xblockInfo.isVertical()) {
                 editors = [StaffLockEditor];
             }

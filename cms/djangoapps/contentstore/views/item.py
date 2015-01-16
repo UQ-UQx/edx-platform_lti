@@ -739,6 +739,7 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
         "released_to_students": datetime.now(UTC) > xblock.start,
         "release_date": release_date,
         "visibility_state": visibility_state,
+        "lti_enabled": xblock.fields['lti_enabled'].is_set_on(xblock),
         "has_explicit_staff_lock": xblock.fields['visible_to_staff_only'].is_set_on(xblock),
         "start": xblock.fields['start'].to_json(xblock.start),
         "graded": xblock.graded,

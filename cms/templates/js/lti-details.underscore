@@ -1,0 +1,42 @@
+<form>
+<style>
+    .course-outline-modal .edit-lti-details .checkbox-cosmetic .field-lti  {
+        display:none;
+    }
+    .course-outline-modal .edit-lti-details .checkbox-cosmetic input:checked ~ ul .field-lti {
+        display:block;
+    }
+</style>
+<h3 class="modal-section-title"><%= gettext('LTI Tool Provider') %></h3>
+<div class="modal-section-content staff-lockz">
+    <ul class="list-fields list-input">
+        <li class="field field-checkbox checkbox-cosmetic">
+            <input type="checkbox" id="lti_enabled" name="lti_enabled" class="input input-checkbox" />
+            <label for="lti_enabled" class="label">
+              <i class="icon fa fa-check-square-o input-checkbox-checked"></i>
+              <i class="icon fa fa-square-o input-checkbox-unchecked"></i>
+              <%= gettext('Enable subsection as an LTI Tool Provider') %>
+            </label>
+            <ul class="list-fields list-input">
+                <li class="field field-text field-lti">
+                    <label for="lti_launch_url"><%= gettext('LTI Launch URL:') %></label>
+                    <input type="text" name="lti_launch_url" value="" class="lti_launch_url" readonly />
+                </li>
+                <li class="field field-text field-lti">
+                    <label for="due_date"><%= gettext('LTI Username:') %></label>
+                    <input type="text" name="lti_username" value="" class="lti_username" readonly />
+                </li>
+                <li class="field field-text field-lti">
+                    <label for="due_date"><%= gettext('LTI Password:') %></label>
+                    <input type="text" name="lti_secret" value="" class="lti_secret" readonly />
+                </li>
+                <li class="field field-checkbox checkbox-cosmetic">
+                    <p class="tip tip-warning">
+                        <%= gettext('Enabling LTI allows other websites to embed this component into their interface. Grades recorded through LTI will still be sent through to the edX gradebook.') %>
+                    </p>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</form>

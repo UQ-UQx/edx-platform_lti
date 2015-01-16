@@ -104,6 +104,10 @@ function(Backbone, _, str, ModuleUtils) {
              */
             'due': null,
             /**
+             * True iff this xblock is enabled for LTI.
+             */
+            'lti_enabled': null,
+            /**
              * True iff this xblock is explicitly staff locked.
              */
             'has_explicit_staff_lock': null,

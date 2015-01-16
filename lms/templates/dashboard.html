@@ -146,6 +146,41 @@
         </li>
         % endif
 
+        % if microsite.get_value('ENABLE_THIRD_PARTY_AUTH', settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH')):
+        <li class="controls--account">
+          <span class="title">
+            ## Translators: this section lists all the third-party authentication providers (for example, Google and LinkedIn) the user can link with or unlink from their edX account.
+            ${_("Learning Tools Connections")}
+          </span>
+
+          <span class="data">
+            <span class="third-party-auth">
+
+            <div class="auth-provider">
+
+              <div class="status">
+                <i class="icon icon-link"></i> <span class="copy">${_("Linked")}</span>
+              </div>
+
+              <span class="provider">UQ - ENG1200</span>
+              <span class="control">
+              <form
+                  action="${pipeline.get_disconnect_url(state.provider.NAME)}"
+                  method="post"
+                  name="${state.get_unlink_form_name()}">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
+                  <a href="#" onclick="document.${state.get_unlink_form_name()}.submit()">
+                    ## Translators: clicking on this removes the link between a user's edX account and their account with an external authentication provider (like Google or LinkedIn).
+                    ${_("Unlink")}
+                  </a>
+              </form>
+
+              </span>
+            </div>
+          </span>
+        </li>
+        % endif
+
         % if len(order_history_list):
         <li class="order-history">
           <span class="title">${_("Order History")}</span>
