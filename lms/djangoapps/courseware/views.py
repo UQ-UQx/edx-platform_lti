@@ -67,7 +67,14 @@ import survey.utils
 import survey.views
 
 from util.views import ensure_valid_course_key
+
+#START DEKKER
+from django.contrib.auth import authenticate, logout, login
 from django.views.decorators.csrf import csrf_exempt
+from oauthlib.oauth1.rfc5849 import signature
+from collections import OrderedDict
+import urllib
+#END DEKKER
 
 log = logging.getLogger("edx.courseware")
 
@@ -449,7 +456,10 @@ def _index_bulk_op(request, course_key, chapter, section, position):
                 context['default_tab'] = section_descriptor.default_tab
 
             ### DEKKER
-            if 'lti' in request.GET and request.GET['lti'] == 'true':
+            if request.session.get('lti_view'):
+                print "FOUND LTI"
+                lti = request.session.get('lti_vars')
+                request.session['lti_view'] = False
                 context['disable_accordion'] = True
                 context['disable_tabs'] = True
                 context['suppress_toplevel_navigation'] = True
@@ -602,6 +612,101 @@ def jump_to(request, course_id, location):
         raise Http404(u"No data at this location: {0}".format(usage_key))
     except NoPathToItem:
         raise Http404(u"This location is not in any class: {0}".format(usage_key))
+
+    # choose the appropriate view (and provide the necessary args) based on the
+    # args provided by the redirect.
+    # Rely on index to do all error handling and access control.
+    if chapter is None:
+        return redirect('courseware', course_id=course_key.to_deprecated_string())
+    elif section is None:
+        return redirect('courseware_chapter', course_id=course_key.to_deprecated_string(), chapter=chapter)
+    elif position is None:
+        return redirect('courseware_section', course_id=course_key.to_deprecated_string(), chapter=chapter, section=section)
+    else:
+        return redirect('courseware_position', course_id=course_key.to_deprecated_string(), chapter=chapter, section=section, position=position)
+
+
+@ensure_csrf_cookie
+@csrf_exempt
+def jump_to_lti(request, course_id, location):
+    """
+    Show the page that contains a specific location.
+
+    If the location is invalid or not in any class, return a 404.
+
+    Otherwise, delegates to the index view to figure out whether this user
+    has access, and what they should see.
+    """
+    try:
+        course_key = SlashSeparatedCourseKey.from_deprecated_string(course_id)
+        usage_key = course_key.make_usage_key_from_deprecated_string(location)
+    except InvalidKeyError:
+        raise Http404(u"Invalid course_key or usage_key")
+    try:
+        (course_key, chapter, section, position) = path_to_location(modulestore(), usage_key)
+    except ItemNotFoundError:
+        raise Http404(u"No data at this location: {0}".format(usage_key))
+    except NoPathToItem:
+        raise Http404(u"This location is not in any class: {0}".format(usage_key))
+
+    print "===STARTING JUMP==="
+
+    print "NEED TO LOGIN USER IF THEY ARENT"
+
+    if 'oauth_consumer_key' in request.POST:
+
+        lti_keys = {"testing": "123"}
+
+        users_lti = {
+            "292832126": "staff",
+            "e31b4beb3d191cd47b07e17735728d53": "staff"
+        }
+
+        if 'oauth_consumer_key' in request.POST and request.POST['oauth_consumer_key'] in lti_keys:
+
+            lti_consumer_secret = lti_keys[request.POST['oauth_consumer_key']]
+            #Request Method
+            lti_request_http_method = unicode('POST')
+            #Request URL
+            lti_request_uri = unicode(urllib.unquote(request.build_absolute_uri()))
+            uri = signature.normalize_base_string_uri(lti_request_uri)
+            #Request parameters
+            resp = dict(request.POST.dict())
+            orderedresp = OrderedDict(sorted(resp.items(), key=lambda t: t[0]))
+            query_string = urllib.urlencode(orderedresp)
+            oauth_headers = dict(signature.collect_parameters(query_string))
+            lti_request_params = signature.normalize_parameters(oauth_headers.items())
+
+            base_string = signature.construct_base_string(lti_request_http_method, uri, lti_request_params)
+            check_sig = signature.sign_hmac_sha1(base_string, unicode(lti_consumer_secret), None)
+            if check_sig == request.POST['oauth_signature']:
+                valid_user = False
+                if not request.user.is_authenticated():
+                    user_lookup = request.POST['user_id']
+                    if user_lookup in users_lti:
+                        user = User.objects.filter(username=users_lti[user_lookup])
+                        if user and len(user) > 0:
+                            user = user[0]
+                            user.backend = 'django.contrib.auth.backends.ModelBackend'
+                            user.save()
+                            login(request, user)
+                            valid_user = True
+                    else:
+                        # THIS IS WHERE WE NEED TO REDIRECT TO ADDING THE USERS KEY
+                        pass
+                else:
+                    valid_user = True
+                if valid_user:
+                    request.session['lti_view'] = 'true'
+                    request.session['lti_vars'] = dict(request.POST.dict())
+                else:
+                    raise PermissionDenied
+            else:
+                raise PermissionDenied
+        else:
+            raise PermissionDenied
+
+    print "===FINISHING JUMP==="
 
     # choose the appropriate view (and provide the necessary args) based on the
     # args provided by the redirect.
@@ -1200,3 +1305,4 @@ def course_survey(request, course_id):
         redirect_url=redirect_url,
         is_required=course.course_survey_required,
     )
+
