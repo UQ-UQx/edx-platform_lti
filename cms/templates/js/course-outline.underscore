@@ -19,6 +19,9 @@ if (staffOnlyMessage) {
             statusMessage = gettext('Unpublished changes to content that will release in the future');
         }
     }
+} else if (ltiEnabledMessage) {
+    statusType = 'lti-enabled';
+    statusMessage = gettext('LTI Enabled');
 }
 
 var statusIconClass = '';
@@ -28,6 +31,8 @@ if (statusType === 'warning') {
     statusIconClass = 'fa-warning';
 } else if (statusType === 'staff-only') {
     statusIconClass = 'fa-lock';
+} else if (statusType === 'lti-enabled') {
+    statusIconClass = 'fa-university';
 }
 
 var gradingType = gettext('Not Graded');

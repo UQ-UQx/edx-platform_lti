@@ -18,6 +18,7 @@
               <%= gettext('Enable subsection as an LTI Tool Provider') %>
             </label>
             <ul class="list-fields list-input">
+                <% if (hasLTIEnabled) { %>
                 <li class="field field-text field-lti">
                     <label for="lti_launch_url"><%= gettext('LTI Launch URL:') %></label>
                     <input type="text" name="lti_launch_url" value="" class="lti_launch_url" readonly />
@@ -30,6 +31,13 @@
                     <label for="due_date"><%= gettext('LTI Password:') %></label>
                     <input type="text" name="lti_secret" value="" class="lti_secret" readonly />
                 </li>
+                <% } else { %>
+                <li class="field field-checkbox checkbox-cosmetic field-lti">
+                    <p class="tip tip-warning">
+                        <%= gettext('Reopen this window to retrieve LTI settings.') %>
+                    </p>
+                </li>
+                <% } %>
                 <li class="field field-checkbox checkbox-cosmetic">
                     <p class="tip tip-warning">
                         <%= gettext('Enabling LTI allows other websites to embed this component into their interface. Grades recorded through LTI will still be sent through to the edX gradebook.') %>
