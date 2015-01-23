@@ -24,12 +24,12 @@
                     <input type="text" name="lti_launch_url" value="" class="lti_launch_url" readonly />
                 </li>
                 <li class="field field-text field-lti">
-                    <label for="due_date"><%= gettext('LTI Username:') %></label>
-                    <input type="text" name="lti_username" value="" class="lti_username" readonly />
+                    <label for="due_date"><%= gettext('LTI Client Key:') %></label>
+                    <input type="text" name="lti_client_key" value="" class="lti_client_key" readonly />
                 </li>
                 <li class="field field-text field-lti">
-                    <label for="due_date"><%= gettext('LTI Password:') %></label>
-                    <input type="text" name="lti_secret" value="" class="lti_secret" readonly />
+                    <label for="due_date"><%= gettext('LTI Client Secret:') %></label>
+                    <input type="text" name="lti_client_secret" value="" class="lti_client_secret" readonly />
                 </li>
                 <% } else { %>
                 <li class="field field-checkbox checkbox-cosmetic field-lti">

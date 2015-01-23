@@ -455,17 +455,6 @@ def _index_bulk_op(request, course_key, chapter, section, position):
             if section_descriptor.default_tab:
                 context['default_tab'] = section_descriptor.default_tab
 
-            ### DEKKER
-            if request.session.get('lti_view'):
-                print "FOUND LTI"
-                lti = request.session.get('lti_vars')
-                request.session['lti_view'] = False
-                context['disable_accordion'] = True
-                context['disable_tabs'] = True
-                context['suppress_toplevel_navigation'] = True
-                context['suppress_module_navigation'] = True
-            ### END DEKKER
-
             # cdodge: this looks silly, but let's refetch the section_descriptor with depth=None
             # which will prefetch the children more efficiently than doing a recursive load
             section_descriptor = modulestore().get_item(section_descriptor.location, depth=None)
@@ -496,6 +485,19 @@ def _index_bulk_op(request, course_key, chapter, section, position):
                 # User may be trying to be clever and access something
                 # they don't have access to.
                 raise Http404
+
+            ### DEKKER
+            if request.session.get('lti_view'):
+                if section_module.lti_enabled:
+                    lti = request.session.get('lti_vars')
+                    request.session['lti_view'] = False
+                    context['disable_accordion'] = True
+                    context['disable_tabs'] = True
+                    context['suppress_toplevel_navigation'] = True
+                    context['suppress_module_navigation'] = True
+                else:
+                    raise PermissionDenied
+            ### END DEKKER
 
             # Save where we are in the chapter
             save_child_position(chapter_module, section)

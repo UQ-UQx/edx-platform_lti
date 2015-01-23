@@ -317,17 +317,17 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
             if(value) {
                 this.$('.lti_launch_url').val('http://localhost:8000/courses/edX/DemoX/Demo_Course/jump_to_lti/i4x://edX/DemoX/vertical/vertical_0270f6de40fc');
                 this.$('.lti_launch_url').attr('disabled',false);
-                this.$('.lti_username').val('testing');
-                this.$('.lti_username').attr('disabled',false);
-                this.$('.lti_secret').val('123');
-                this.$('.lti_secret').attr('disabled',false);
+                this.$('.lti_client_key').val('testing');
+                this.$('.lti_client_key').attr('disabled',false);
+                this.$('.lti_client_secret').val('123');
+                this.$('.lti_client_secret').attr('disabled',false);
             } else {
                 this.$('.lti_launch_url').val('');
                 this.$('.lti_launch_url').attr('disabled',true);
-                this.$('.lti_username').val('');
-                this.$('.lti_username').attr('disabled',true);
-                this.$('.lti_secret').val('');
-                this.$('.lti_secret').attr('disabled',true);
+                this.$('.lti_client_key').val('');
+                this.$('.lti_client_key').attr('disabled',true);
+                this.$('.lti_client_secret').val('');
+                this.$('.lti_client_secret').attr('disabled',true);
             }
         },
 
@@ -340,7 +340,6 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         getRequestData: function() {
-            //return {};  // REMOVE THIS BLBK
             return this.hasChanges() ? {
                 publish: 'republish',
                 metadata: {
