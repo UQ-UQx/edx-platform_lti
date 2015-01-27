@@ -134,8 +134,36 @@
 % endif
 
 </head>
-
-<body class="${dir_rtl} <%block name='bodyclass'/> lang_${LANGUAGE_CODE}">
+<!-- DEKKER -->
+<style type="text/css">
+    body.lti_embedded header.global {
+        display:none;
+    }
+    body.lti_embedded div.wrapper-footer {
+        display:none;
+    }
+    body.lti_embedded nav.sequence-bottom {
+        display:none;
+    }
+    body.lti_embedded div.content-wrapper {
+        padding:0;
+    }
+    body.lti_embedded div.container {
+        min-width:0;
+        max-width:none;
+        margin:0;
+        padding:0;
+    }
+    body.lti_embedded div.course-wrapper {
+        border:0;
+    }
+</style>
+<!-- END DEKKER -->
+<body class="${dir_rtl} <%block name='bodyclass'/> lang_${LANGUAGE_CODE}
+% if suppress_module_navigation:
+    lti_embedded
+% endif
+">
   <div class="window-wrap" dir="${dir_rtl}">
     <a class="nav-skip" href="<%block name="nav_skip">#content</%block>">${_("Skip to this view's content")}</a>
 

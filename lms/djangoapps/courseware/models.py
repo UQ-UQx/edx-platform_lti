@@ -226,3 +226,28 @@ class OfflineComputedGradeLog(models.Model):
 
     def __unicode__(self):
         return "[OCGLog] %s: %s" % (self.course_id.to_deprecated_string(), self.created)  # pylint: disable=no-member
+
+###DEKKER
+
+
+class LTIComponent(models.Model):
+    """
+    Keeps track of key and secrets for LTI components
+    """
+    user = models.ForeignKey(User, db_index=True)
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    module_id = models.TextField()
+    key = models.TextField()
+    secret = models.TextField()
+    created = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
+
+    def __unicode__(self):
+        return "[LTIComponent] %s %s: %s = %s" % (self.course_id, self.module_id, self.key, self.secret)
+
+
+#class LTIUserAuth
+    """
+    Keeps track of authenticated anon_user IDs with institution meta-data and their respective user
+    """
+
+###ENDDEKKER

@@ -37,7 +37,7 @@ from courseware.courses import sort_by_start_date
 from courseware.masquerade import setup_masquerade
 from courseware.model_data import FieldDataCache
 from .module_render import toc_for_course, get_module_for_descriptor, get_module
-from courseware.models import StudentModule, StudentModuleHistory
+from courseware.models import StudentModule, StudentModuleHistory, LTIComponent
 from course_modes.models import CourseMode
 
 from lms.djangoapps.lms_xblock.models import XBlockAsidesConfig
@@ -493,7 +493,6 @@ def _index_bulk_op(request, course_key, chapter, section, position):
                     request.session['lti_view'] = False
                     context['disable_accordion'] = True
                     context['disable_tabs'] = True
-                    context['suppress_toplevel_navigation'] = True
                     context['suppress_module_navigation'] = True
                 else:
                     raise PermissionDenied
@@ -631,6 +630,7 @@ def jump_to(request, course_id, location):
 @ensure_csrf_cookie
 @csrf_exempt
 def jump_to_lti(request, course_id, location):
+    #START DEKKER
     """
     Show the page that contains a specific location.
 
@@ -657,16 +657,19 @@ def jump_to_lti(request, course_id, location):
 
     if 'oauth_consumer_key' in request.POST:
 
-        lti_keys = {"testing": "123"}
+        print "BLBK"
+        lti_details = LTIComponent.objects.filter(course_id=course_key, module_id=usage_key, key=request.POST['oauth_consumer_key'])
+
+        #lti_keys = {"testing": "123"}
 
         users_lti = {
             "292832126": "staff",
             "e31b4beb3d191cd47b07e17735728d53": "staff"
         }
 
-        if 'oauth_consumer_key' in request.POST and request.POST['oauth_consumer_key'] in lti_keys:
+        if 'oauth_consumer_key' in request.POST and len(lti_details) > 0:
 
-            lti_consumer_secret = lti_keys[request.POST['oauth_consumer_key']]
+            lti_consumer_secret = lti_details[0].secret
             #Request Method
             lti_request_http_method = unicode('POST')
             #Request URL
@@ -721,6 +724,8 @@ def jump_to_lti(request, course_id, location):
         return redirect('courseware_section', course_id=course_key.to_deprecated_string(), chapter=chapter, section=section)
     else:
         return redirect('courseware_position', course_id=course_key.to_deprecated_string(), chapter=chapter, section=section, position=position)
+
+    #END DEKKER
 
 
 @ensure_csrf_cookie

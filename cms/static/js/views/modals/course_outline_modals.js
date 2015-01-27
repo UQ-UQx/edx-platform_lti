@@ -312,14 +312,13 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         setEnabled: function(value) {
-            console.log("THIS IS WHAT SETS");
             this.$('#lti_enabled').prop('checked', value);
             if(value) {
-                this.$('.lti_launch_url').val('http://localhost:8000/courses/edX/DemoX/Demo_Course/jump_to_lti/i4x://edX/DemoX/vertical/vertical_0270f6de40fc');
+                this.$('.lti_launch_url').val('http://localhost:8000/courses/edX/DemoX/Demo_Course/jump_to_lti/'+this.model.get('lti_url'));
                 this.$('.lti_launch_url').attr('disabled',false);
-                this.$('.lti_client_key').val('testing');
+                this.$('.lti_client_key').val(this.model.get('lti_key'));
                 this.$('.lti_client_key').attr('disabled',false);
-                this.$('.lti_client_secret').val('123');
+                this.$('.lti_client_secret').val(this.model.get('lti_secret'));
                 this.$('.lti_client_secret').attr('disabled',false);
             } else {
                 this.$('.lti_launch_url').val('');

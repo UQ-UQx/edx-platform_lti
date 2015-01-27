@@ -48,6 +48,12 @@ from models.settings.course_grading import CourseGradingModel
 from cms.lib.xblock.runtime import handler_url, local_resource_url
 from opaque_keys.edx.keys import UsageKey, CourseKey
 
+# START DEKKER
+from models.settings.lti_component import LTIComponent
+import string
+import random
+# END DEKKER
+
 __all__ = ['orphan_handler', 'xblock_handler', 'xblock_view_handler', 'xblock_outline_handler']
 
 log = logging.getLogger(__name__)
@@ -740,6 +746,9 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
         "release_date": release_date,
         "visibility_state": visibility_state,
         "lti_enabled": xblock.fields['lti_enabled'].is_set_on(xblock),
+        "lti_url": "",
+        "lti_key": "",
+        "lti_secret": "",
         "has_explicit_staff_lock": xblock.fields['visible_to_staff_only'].is_set_on(xblock),
         "start": xblock.fields['start'].to_json(xblock.start),
         "graded": xblock.graded,
@@ -749,6 +758,40 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
         "course_graders": json.dumps([grader.get('type') for grader in graders]),
         "has_changes": has_changes,
     }
+
+    course_id = xblock.location.course_key
+    usr = int(xblock.subtree_edited_by)
+    existing_components = LTIComponent.objects.filter(course_id=course_id, module_id=xblock.location, user_id=usr)
+    if xblock.fields['lti_enabled'].is_set_on(xblock):
+        print xblock
+        print xblock.location
+        key = ""
+        secret = ""
+        if len(existing_components) == 0:
+            key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+            secret = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+            lti_component = LTIComponent(
+                user_id=usr,
+                course_id=course_id,
+                module_id=str(xblock.location),
+                key=key,
+                secret=secret
+            )
+            lti_component.save()
+        else:
+            key = existing_components[0].key
+            secret = existing_components[0].secret
+        xblock_info["lti_url"] = str(xblock.location)
+        xblock_info["lti_key"] = key
+        xblock_info["lti_secret"] = secret
+        print xblock_info
+    else:
+        if len(existing_components) > 0:
+            for existing_component in existing_components:
+                existing_components.delete()
+
+    # END DEKKER
+
     if data is not None:
         xblock_info["data"] = data
     if metadata is not None:

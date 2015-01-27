@@ -108,6 +108,18 @@ function(Backbone, _, str, ModuleUtils) {
              */
             'lti_enabled': null,
             /**
+             * The URL of the LTI component
+             */
+            'lti_url': "",
+            /**
+             * The key for the LTI component access
+             */
+            'lti_key': "",
+            /**
+             * The secret for the LTI component access
+             */
+            'lti_secret': "",
+            /**
              * True iff this xblock is explicitly staff locked.
              */
             'has_explicit_staff_lock': null,

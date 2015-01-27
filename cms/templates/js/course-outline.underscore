@@ -8,6 +8,9 @@ var statusType = null;
 if (staffOnlyMessage) {
     statusType = 'staff-only';
     statusMessage = gettext('Contains staff only content');
+} else if (ltiEnabledMessage) {
+    statusType = 'lti-enabled';
+    statusMessage = gettext('LTI Enabled');
 } else if (visibilityState === 'needs_attention') {
     if (xblockInfo.isVertical()) {
         statusType = 'warning';
@@ -19,9 +22,6 @@ if (staffOnlyMessage) {
             statusMessage = gettext('Unpublished changes to content that will release in the future');
         }
     }
-} else if (ltiEnabledMessage) {
-    statusType = 'lti-enabled';
-    statusMessage = gettext('LTI Enabled');
 }
 
 var statusIconClass = '';
