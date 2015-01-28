@@ -74,6 +74,7 @@ from django.views.decorators.csrf import csrf_exempt
 from oauthlib.oauth1.rfc5849 import signature
 from collections import OrderedDict
 import urllib
+from student.models import LTIUserAuth
 #END DEKKER
 
 log = logging.getLogger("edx.courseware")
@@ -651,21 +652,11 @@ def jump_to_lti(request, course_id, location):
     except NoPathToItem:
         raise Http404(u"This location is not in any class: {0}".format(usage_key))
 
-    print "===STARTING JUMP==="
-
-    print "NEED TO LOGIN USER IF THEY ARENT"
-
     if 'oauth_consumer_key' in request.POST:
 
-        print "BLBK"
         lti_details = LTIComponent.objects.filter(course_id=course_key, module_id=usage_key, key=request.POST['oauth_consumer_key'])
 
-        #lti_keys = {"testing": "123"}
-
-        users_lti = {
-            "292832126": "staff",
-            "e31b4beb3d191cd47b07e17735728d53": "staff"
-        }
+        lti_user = LTIUserAuth.objects.filter(lti_user_id=request.POST['user_id'])
 
         if 'oauth_consumer_key' in request.POST and len(lti_details) > 0:
 
@@ -686,21 +677,37 @@ def jump_to_lti(request, course_id, location):
             check_sig = signature.sign_hmac_sha1(base_string, unicode(lti_consumer_secret), None)
             if check_sig == request.POST['oauth_signature']:
                 valid_user = False
-                if not request.user.is_authenticated():
-                    user_lookup = request.POST['user_id']
-                    if user_lookup in users_lti:
-                        user = User.objects.filter(username=users_lti[user_lookup])
-                        if user and len(user) > 0:
-                            user = user[0]
-                            user.backend = 'django.contrib.auth.backends.ModelBackend'
-                            user.save()
-                            login(request, user)
-                            valid_user = True
-                    else:
-                        # THIS IS WHERE WE NEED TO REDIRECT TO ADDING THE USERS KEY
-                        pass
-                else:
+                if len(lti_user) > 0:
+                    user = lti_user[0].user
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    user.save()
+                    login(request, user)
                     valid_user = True
+                    pass
+                else:
+                    if request.user.is_authenticated():
+                        #Assume for the moment the logged in user is the attached user
+                        print "NOT ATTACHED TO LTI"
+                        new_lti_user = LTIUserAuth(
+                            user=request.user,
+                            roles=request.POST['roles'],
+                            institution="Unknown",
+                            lti_user_id=request.POST['user_id'],
+                            lti_data=json.dumps(request.POST, sort_keys=True),
+                            lti_email="Unknown"
+                        )
+                        new_lti_user.save()
+                        valid_user = True
+                    else:
+                        request.session['lti_login'] = 'true'
+                        request.session['lti_details'] = dict(request.POST.dict())
+
+                        redir = str(redirect('courseware_section', course_id=course_key.to_deprecated_string(), chapter=chapter, section=section))
+                        redir = redir[redir.rfind('Location:')+10:]
+                        redir = redir.split("\n")[0]
+                        request.session['lti_redirect'] = redir
+                        return redirect(settings.LOGIN_URL)
+                        pass
                 if valid_user:
                     request.session['lti_view'] = 'true'
                     request.session['lti_vars'] = dict(request.POST.dict())
@@ -710,8 +717,6 @@ def jump_to_lti(request, course_id, location):
                 raise PermissionDenied
         else:
             raise PermissionDenied
-
-    print "===FINISHING JUMP==="
 
     # choose the appropriate view (and provide the necessary args) based on the
     # args provided by the redirect.

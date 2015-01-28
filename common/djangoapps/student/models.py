@@ -1432,3 +1432,23 @@ class DashboardConfiguration(ConfigurationModel):
     @property
     def recent_enrollment_seconds(self):
         return self.recent_enrollment_time_delta
+
+
+### DEKKER BLBK
+
+
+class LTIUserAuth(models.Model):
+    """
+    Keeps track of authenticated anon_user IDs with institution meta-data and their respective user
+    """
+    user = models.ForeignKey(User, db_index=True)
+    roles = models.TextField(blank=False)
+    institution = models.TextField(blank=True)
+    lti_user_id = models.TextField(blank=False)
+    lti_data = models.TextField(blank=False)
+    lti_email = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return "[LTIUserAuth] %s %s = %s" % (self.user, self.roles, self.lti_data)
+
+### END DEKKER

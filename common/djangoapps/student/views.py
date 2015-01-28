@@ -110,6 +110,10 @@ from openedx.core.djangoapps.user_api.api import profile as profile_api
 import analytics
 from eventtracking import tracker
 
+### START DEKKER
+from student.models import LTIUserAuth
+### END DEKKER
+
 
 log = logging.getLogger("edx.student")
 AUDIT_LOG = logging.getLogger("audit")
@@ -1138,10 +1142,33 @@ def login_user(request, error=""):  # pylint: disable-msg=too-many-statements,un
         )
 
     if user is not None and user.is_active:
+
+        ### START DEKKER
+        lti_auth_successful = False
+        ### END DEKKER
+
         try:
             # We do not log here, because we have a handler registered
             # to perform logging on successful logins.
             login(request, user)
+
+            ### START DEKKER
+            print request.session['lti_login']
+            print request.session['lti_details']
+            if request.session['lti_login'] == 'true':
+                new_lti_user = LTIUserAuth(
+                    user=user,
+                    roles=request.session['lti_details']['roles'],
+                    institution="Unknown",
+                    lti_user_id=request.session['lti_details']['user_id'],
+                    lti_data=json.dumps(request.session['lti_details'], sort_keys=True),
+                    lti_email="Unknown"
+                )
+                new_lti_user.save()
+                lti_auth_successful = True
+
+            ### END DEKKER
+
             if request.POST.get('remember') == 'true':
                 request.session.set_expiry(604800)
                 log.debug("Setting user session to never expire")
@@ -1157,6 +1184,18 @@ def login_user(request, error=""):  # pylint: disable-msg=too-many-statements,un
 
         if third_party_auth_successful:
             redirect_url = pipeline.get_complete_url(backend_name)
+
+        ### START DEKKER
+
+        if request.session['lti_login'] == 'true' and lti_auth_successful:
+            redirect_url = request.session['lti_redirect']
+            request.session['lti_view'] = 'true'
+            request.session['lti_vars'] = request.session['lti_details']
+            request.session['lti_login'] = ''
+            request.session['lti_details'] = ''
+            request.session['lti_redirect'] = ''
+
+        ### END DEKKER
 
         response = JsonResponse({
             "success": True,

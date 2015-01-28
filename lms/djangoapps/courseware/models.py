@@ -245,9 +245,4 @@ class LTIComponent(models.Model):
         return "[LTIComponent] %s %s: %s = %s" % (self.course_id, self.module_id, self.key, self.secret)
 
 
-#class LTIUserAuth
-    """
-    Keeps track of authenticated anon_user IDs with institution meta-data and their respective user
-    """
-
 ###ENDDEKKER
