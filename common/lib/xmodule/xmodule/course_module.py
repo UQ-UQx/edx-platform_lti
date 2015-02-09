@@ -169,6 +169,12 @@ class CourseFields(object):
         help=_("Enter the passports for course LTI tools in the following format: \"id:client_key:client_secret\"."),
         scope=Scope.settings
     )
+    lti_enabled = Boolean(
+        display_name=_("Course as LTI Tool Provider"),
+        help=_("Enter true or false. If true, subsections in the course can act as LTI tool providers."),
+        default=False,
+        scope=Scope.settings,
+    )
     textbooks = TextbookList(help="List of pairs of (title, url) for textbooks used in this course",
                              default=[], scope=Scope.content)
 

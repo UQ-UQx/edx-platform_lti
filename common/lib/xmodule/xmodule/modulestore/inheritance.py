@@ -53,7 +53,8 @@ class InheritanceMixin(XBlockMixin):
         scope=Scope.user_state,
     )
     lti_enabled = Boolean(
-        help=_("If true, can be embedded in an LTI container."),
+        display_name=_("Course as LTI Tool Provider"),
+        help=_("Enter true or false. If true, subsections in the course can act as LTI tool providers."),
         default=False,
         scope=Scope.settings,
     )

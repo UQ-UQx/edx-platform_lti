@@ -761,31 +761,38 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
     }
 
     if settings.FEATURES.get('ENABLE_AS_LTI_TOOL_PROVIDER', False):
-        course_id = xblock.location.course_key
-        usr = int(xblock.subtree_edited_by)
-        existing_components = LTIComponent.objects.filter(course_id=course_id, module_id=xblock.location, user_id=usr)
-        if xblock.fields['lti_enabled'].is_set_on(xblock):
-            if len(existing_components) == 0:
-                key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
-                secret = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
-                lti_component = LTIComponent(
-                    user_id=usr,
-                    course_id=course_id,
-                    module_id=str(xblock.location),
-                    key=key,
-                    secret=secret
-                )
-                lti_component.save()
+        store = modulestore()
+        course = store.get_course(xblock.location.course_key)
+        if course.lti_enabled:
+            course_id = xblock.location.course_key
+            usr = int(xblock.subtree_edited_by)
+            existing_components = LTIComponent.objects.filter(course_id=course_id, module_id=xblock.location, user_id=usr)
+            if xblock.fields['lti_enabled'].is_set_on(xblock):
+                if len(existing_components) == 0:
+                    key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                    secret = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+                    lti_component = LTIComponent(
+                        user_id=usr,
+                        course_id=course_id,
+                        module_id=str(xblock.location),
+                        key=key,
+                        secret=secret
+                    )
+                    lti_component.save()
+                else:
+                    key = existing_components[0].key
+                    secret = existing_components[0].secret
+                xblock_info["lti_url"] = str(xblock.location)
+                xblock_info["lti_key"] = key
+                xblock_info["lti_secret"] = secret
             else:
-                key = existing_components[0].key
-                secret = existing_components[0].secret
-            xblock_info["lti_url"] = str(xblock.location)
-            xblock_info["lti_key"] = key
-            xblock_info["lti_secret"] = secret
+                if len(existing_components) > 0:
+                    for existing_component in existing_components:
+                        existing_components.delete()
         else:
-            if len(existing_components) > 0:
-                for existing_component in existing_components:
-                    existing_components.delete()
+            xblock_info["lti_url"] = "disabled"
+            xblock_info["lti_key"] = "disabled"
+            xblock_info["lti_secret"] = "disabled"
     else:
         xblock_info["lti_url"] = "disabled"
         xblock_info["lti_key"] = "disabled"

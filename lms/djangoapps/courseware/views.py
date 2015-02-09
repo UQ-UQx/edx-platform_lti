@@ -489,9 +489,9 @@ def _index_bulk_op(request, course_key, chapter, section, position):
 
             ### DEKKER
             if request.session.get('lti_view'):
-                if section_module.lti_enabled:
+                request.session['lti_view'] = False
+                if course.lti_enabled and section_module.lti_enabled:
                     lti = request.session.get('lti_vars')
-                    request.session['lti_view'] = False
                     context['disable_accordion'] = True
                     context['disable_tabs'] = True
                     context['suppress_module_navigation'] = True

@@ -1153,9 +1153,7 @@ def login_user(request, error=""):  # pylint: disable-msg=too-many-statements,un
             login(request, user)
 
             ### START DEKKER
-            print request.session['lti_login']
-            print request.session['lti_details']
-            if request.session['lti_login'] == 'true':
+            if 'lti_login' in request.session and request.session['lti_login'] == 'true':
                 new_lti_user = LTIUserAuth(
                     user=user,
                     roles=request.session['lti_details']['roles'],
@@ -1184,10 +1182,9 @@ def login_user(request, error=""):  # pylint: disable-msg=too-many-statements,un
 
         if third_party_auth_successful:
             redirect_url = pipeline.get_complete_url(backend_name)
-
         ### START DEKKER
 
-        if request.session['lti_login'] == 'true' and lti_auth_successful:
+        if 'lti_login' in request.session and request.session['lti_login'] == 'true' and lti_auth_successful:
             redirect_url = request.session['lti_redirect']
             request.session['lti_view'] = 'true'
             request.session['lti_vars'] = request.session['lti_details']
