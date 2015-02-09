@@ -312,21 +312,26 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         setEnabled: function(value) {
-            this.$('#lti_enabled').prop('checked', value);
-            if(value) {
-                this.$('.lti_launch_url').val('http://localhost:8000/courses/edX/DemoX/Demo_Course/jump_to_lti/'+this.model.get('lti_url'));
-                this.$('.lti_launch_url').attr('disabled',false);
-                this.$('.lti_client_key').val(this.model.get('lti_key'));
-                this.$('.lti_client_key').attr('disabled',false);
-                this.$('.lti_client_secret').val(this.model.get('lti_secret'));
-                this.$('.lti_client_secret').attr('disabled',false);
+            if(this.model.get('lti_url') == 'disabled') {
+                this.$('.modal-form-lti').css({'display':'none'});
             } else {
-                this.$('.lti_launch_url').val('');
-                this.$('.lti_launch_url').attr('disabled',true);
-                this.$('.lti_client_key').val('');
-                this.$('.lti_client_key').attr('disabled',true);
-                this.$('.lti_client_secret').val('');
-                this.$('.lti_client_secret').attr('disabled',true);
+                this.$('.modal-form-lti').css({'display':'block'});
+                this.$('#lti_enabled').prop('checked', value);
+                if (value) {
+                    this.$('.lti_launch_url').val('http://localhost:8000/courses/edX/DemoX/Demo_Course/jump_to_lti/' + this.model.get('lti_url'));
+                    this.$('.lti_launch_url').attr('disabled', false);
+                    this.$('.lti_client_key').val(this.model.get('lti_key'));
+                    this.$('.lti_client_key').attr('disabled', false);
+                    this.$('.lti_client_secret').val(this.model.get('lti_secret'));
+                    this.$('.lti_client_secret').attr('disabled', false);
+                } else {
+                    this.$('.lti_launch_url').val('');
+                    this.$('.lti_launch_url').attr('disabled', true);
+                    this.$('.lti_client_key').val('');
+                    this.$('.lti_client_key').attr('disabled', true);
+                    this.$('.lti_client_secret').val('');
+                    this.$('.lti_client_secret').attr('disabled', true);
+                }
             }
         },
 

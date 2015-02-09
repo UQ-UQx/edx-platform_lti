@@ -94,7 +94,8 @@ define(["jquery", "underscore", "gettext", "js/views/baseview", "js/views/utils/
                     includesChildren: this.shouldRenderChildren(),
                     hasExplicitStaffLock: this.model.get('has_explicit_staff_lock'),
                     staffOnlyMessage: this.model.get('staff_only_message'),
-                    ltiEnabledMessage: this.model.get('lti_enabled')
+                    ltiEnabledMessage: this.model.get('lti_enabled'),
+                    ltiEnabledURL: this.model.get('lti_url')
                 };
             },
 

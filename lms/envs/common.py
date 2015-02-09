@@ -311,6 +311,9 @@ FEATURES = {
 
     # Show the mobile app links in the footer
     'ENABLE_FOOTER_MOBILE_APP_LINKS': False,
+
+    # Enable subsections to be used as LTI tools in other LMS's
+    'ENABLE_AS_LTI_TOOL_PROVIDER': True,
 }
 
 # Ignore static asset files on import which match this pattern

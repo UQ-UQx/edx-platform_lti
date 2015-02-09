@@ -8,7 +8,7 @@ var statusType = null;
 if (staffOnlyMessage) {
     statusType = 'staff-only';
     statusMessage = gettext('Contains staff only content');
-} else if (ltiEnabledMessage) {
+} else if (ltiEnabledMessage && ltiEnabledURL != 'disabled') {
     statusType = 'lti-enabled';
     statusMessage = gettext('LTI Enabled');
 } else if (visibilityState === 'needs_attention') {

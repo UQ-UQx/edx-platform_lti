@@ -49,6 +49,7 @@ from cms.lib.xblock.runtime import handler_url, local_resource_url
 from opaque_keys.edx.keys import UsageKey, CourseKey
 
 # START DEKKER
+from django.conf import settings
 from models.settings.lti_component import LTIComponent
 import string
 import random
@@ -759,38 +760,36 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
         "has_changes": has_changes,
     }
 
-    course_id = xblock.location.course_key
-    usr = int(xblock.subtree_edited_by)
-    existing_components = LTIComponent.objects.filter(course_id=course_id, module_id=xblock.location, user_id=usr)
-    if xblock.fields['lti_enabled'].is_set_on(xblock):
-        print xblock
-        print xblock.location
-        key = ""
-        secret = ""
-        if len(existing_components) == 0:
-            key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
-            secret = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
-            lti_component = LTIComponent(
-                user_id=usr,
-                course_id=course_id,
-                module_id=str(xblock.location),
-                key=key,
-                secret=secret
-            )
-            lti_component.save()
+    if settings.FEATURES.get('ENABLE_AS_LTI_TOOL_PROVIDER', False):
+        course_id = xblock.location.course_key
+        usr = int(xblock.subtree_edited_by)
+        existing_components = LTIComponent.objects.filter(course_id=course_id, module_id=xblock.location, user_id=usr)
+        if xblock.fields['lti_enabled'].is_set_on(xblock):
+            if len(existing_components) == 0:
+                key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                secret = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+                lti_component = LTIComponent(
+                    user_id=usr,
+                    course_id=course_id,
+                    module_id=str(xblock.location),
+                    key=key,
+                    secret=secret
+                )
+                lti_component.save()
+            else:
+                key = existing_components[0].key
+                secret = existing_components[0].secret
+            xblock_info["lti_url"] = str(xblock.location)
+            xblock_info["lti_key"] = key
+            xblock_info["lti_secret"] = secret
         else:
-            key = existing_components[0].key
-            secret = existing_components[0].secret
-        xblock_info["lti_url"] = str(xblock.location)
-        xblock_info["lti_key"] = key
-        xblock_info["lti_secret"] = secret
-        print xblock_info
+            if len(existing_components) > 0:
+                for existing_component in existing_components:
+                    existing_components.delete()
     else:
-        if len(existing_components) > 0:
-            for existing_component in existing_components:
-                existing_components.delete()
-
-    # END DEKKER
+        xblock_info["lti_url"] = "disabled"
+        xblock_info["lti_key"] = "disabled"
+        xblock_info["lti_secret"] = "disabled"
 
     if data is not None:
         xblock_info["data"] = data
