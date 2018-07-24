@@ -1,3 +1,5 @@
+# Warning: Before using this code, please turn on the vulnerability alerts in github settings and fix them.
+
 This is the main edX platform which consists of LMS and Studio.
 
 See [code.edx.org](http://code.edx.org/) for other parts of the edX code base.
